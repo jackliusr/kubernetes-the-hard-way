@@ -387,17 +387,23 @@ service-account.pem
 Copy the appropriate certificates and private keys to each worker instance:
 
 ```
-for instance in worker-0 worker-1 worker-2; do
-  gcloud compute scp ca.pem ${instance}-key.pem ${instance}.pem ${instance}:~/
+for instance in  worker1 worker2; do
+docker cp ca.pem "kubernetes-the-hard-way_${instance}_1":/
+docker cp "${instance}-key.pem"  "kubernetes-the-hard-way_${instance}_1":/
+docker cp "${instance}.pem"  "kubernetes-the-hard-way_${instance}_1":/
 done
 ```
 
 Copy the appropriate certificates and private keys to each controller instance:
 
 ```
-for instance in controller-0 controller-1 controller-2; do
-  gcloud compute scp ca.pem ca-key.pem kubernetes-key.pem kubernetes.pem \
-    service-account-key.pem service-account.pem ${instance}:~/
+for instance in master1 master2 master3; do
+docker cp  ca.pem "kubernetes-the-hard-way_${instance}_1":/ 
+docker cp  ca-key.pem "kubernetes-the-hard-way_${instance}_1":/ 
+docker cp  kubernetes-key.pem  "kubernetes-the-hard-way_${instance}_1":/
+docker cp  kubernetes.pem   "kubernetes-the-hard-way_${instance}_1":/
+docker cp  service-account-key.pem  "kubernetes-the-hard-way_${instance}_1":/
+docker cp  service-account.pem  "kubernetes-the-hard-way_${instance}_1":/
 done
 ```
 
