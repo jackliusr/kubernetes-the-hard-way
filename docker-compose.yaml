@@ -1,0 +1,150 @@
+version: "3.9"
+networks:
+  bootstrap:
+    ipam:
+      driver: default
+      config:
+        - subnet: "172.19.0.0/16"
+services:
+  haproxy:
+    hostname: haproxy
+    image: kindest/haproxy:v20200708-548e36db
+    ports:
+    - 6443
+    volumes:
+    - type: bind
+      source: ./configs/haproxy.cfg
+      target: /usr/local/etc/haproxy/haproxy.cfg
+    networks:
+      bootstrap:
+        ipv4_address: 172.19.0.100
+  master1:
+    hostname: master1
+    image: "jackliusr/k8s-node"
+    labels:
+      io.x-k8s.kind.role: control-plane 
+    privileged: true
+    environment:
+     - KUBECONFIG=/etc/kubernetes/admin.conf
+    security_opt:
+    - seccomp:unconfined
+    - apparmor:unconfined
+    ports:
+    - 127.0.0.1:39997:6443
+    networks:
+      bootstrap:
+        ipv4_address: 172.19.0.3
+    restart: on-failure
+    tmpfs:
+    - /tmp
+    - /run
+    volumes:
+      - /var
+      - type: bind
+        source: /lib/modules
+        target: /lib/modules
+        read_only: true
+  master2:
+    hostname: master2
+    image: "jackliusr/k8s-node"
+    labels:
+      io.x-k8s.kind.role: control-plane 
+    privileged: true
+    environment:
+     - KUBECONFIG=/etc/kubernetes/admin.conf
+    security_opt:
+    - seccomp:unconfined
+    - apparmor:unconfined
+    depends_on:
+      - master1
+      - haproxy
+    ports:
+    - 6443
+    restart: on-failure
+    networks:
+      bootstrap:
+    tmpfs:
+    - /tmp
+    - /run
+    volumes:
+      - /var
+      - type: bind
+        source: /lib/modules
+        target: /lib/modules
+        read_only: true
+  master3:
+    hostname: master3
+    image: "jackliusr/k8s-node"
+    labels:
+      io.x-k8s.kind.role: control-plane 
+    privileged: true
+    environment:
+     - KUBECONFIG=/etc/kubernetes/admin.conf
+    security_opt:
+    - seccomp:unconfined
+    - apparmor:unconfined
+    depends_on:
+      - master1
+      - haproxy
+    ports:
+    - 6443
+    restart: on-failure
+    networks:
+      bootstrap:
+    tmpfs:
+    - /tmp
+    - /run
+    volumes:
+      - /var
+      - type: bind
+        source: /lib/modules
+        target: /lib/modules
+        read_only: true
+  worker1:
+    hostname: worker1
+    image: "jackliusr/k8s-node"
+    privileged: true
+    security_opt:
+    - seccomp:unconfined
+    - apparmor:unconfined
+    depends_on:
+      - master1
+      - haproxy
+    ports:
+    - 6443
+    networks:
+      bootstrap:
+    tmpfs:
+    - /tmp
+    - /run
+    restart: on-failure
+    volumes:
+      - /var
+      - type: bind
+        source: /lib/modules
+        target: /lib/modules
+        read_only: true
+  worker2:
+    hostname: worker2
+    image: "jackliusr/k8s-node"
+    privileged: true
+    security_opt:
+    - seccomp:unconfined
+    - apparmor:unconfined
+    depends_on:
+      - master1
+      - haproxy
+    ports:
+    - 6443
+    restart: on-failure
+    networks:
+      bootstrap:
+    tmpfs:
+    - /tmp
+    - /run
+    volumes:
+      - /var
+      - type: bind
+        source: /lib/modules
+        target: /lib/modules
+        read_only: true
